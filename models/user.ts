@@ -7,6 +7,7 @@ interface UserAttributes {
   email: string;
   password: string;
   isActivated: boolean;
+  resetLink: string | null;
   activationLink: string | null;
 }
 
@@ -23,6 +24,7 @@ module.exports = (sequelize: any, DataTypes: any) => {
     email!: string;
     password!: string;
     isActivated!: boolean;
+    resetLink!: string | null;
     activationLink!: string | null;
 
     static associate(models: any) {
@@ -54,6 +56,11 @@ module.exports = (sequelize: any, DataTypes: any) => {
       type: DataTypes.STRING,
       defaultValue: false,
       allowNull: false
+    },
+    resetLink: {
+      type: DataTypes.STRING,
+      defaultValue: '',
+      allowNull: true,
     },
     activationLink: {
       type: DataTypes.STRING,

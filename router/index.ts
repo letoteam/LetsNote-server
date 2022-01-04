@@ -12,10 +12,17 @@ router.post('/sign-up',
     body('name').isLength({min: 3, max: 20}).trim().escape(),
     userController.registration
 );
-router.post('/login');
-router.post('/logout');  
+router.post('/login', userController.login);
+router.post('/logout', userController.logout);
+
+router.put('/recover/forgot-password', userController.forgotPassword);
+router.put('/recover/reset-password',
+    body('newPassword').isLength({min: 6, max: 32}),
+    userController.resetPassword
+);
+
 router.get('/activate/:link', userController.activate);
-router.get('/refresh');
+router.get('/refresh', userController.refresh);
 router.get('/users', userController.getUsers);
 
 export default router;
