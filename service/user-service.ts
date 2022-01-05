@@ -65,19 +65,16 @@ class UserService{
         }
         const userDto = new UserDto(user);
         const resetToken = tokenService.generateResetToken({...userDto});
-        await mailService.sendRecoveryMail(user.email, `${process.env.API_URL}/api/reset-password/${resetToken}`);
+        await mailService.sendRecoveryMail(user.email, `${process.env.CLIENT_URL}/forgot-password/reset-password/${resetToken}`);
         user.resetLink = resetToken;
         await user.save();
     }
 
     async resetPassword(resetLink: string, newPassword: string){
         const userData = tokenService.validateResetToken(resetLink);
-        if(!userData){
+        const user = await UserModel.findOne({where: {resetLink}})
+        if(!userData || !user){
             throw ApiError.BadRequest('Incorrect link or it is expired')
-        }
-        const user = await UserModel.findOne({where: {email: userData.email}})
-        if(!user){
-            throw ApiError.BadRequest('User with this token does not exist')
         }
         const hashNewPassword = await bcrypt.hash(newPassword,3);
         user.password = hashNewPassword;

@@ -40,7 +40,7 @@ class TokenService{
     }
 
     async removeToken(refreshToken: string){
-        const tokenData = await TokenModel.destroy({where: {refreshToken: refreshToken}});
+        const tokenData = await TokenModel.destroy({where: {refreshToken}});
         return tokenData;
     }
 
@@ -50,7 +50,7 @@ class TokenService{
     }
 
     generateResetToken(payload: string){
-        const resetToken = jwt.sign(payload, process.env.RESET_PASSWORD_KEY, {expiresIn: '2000m'}); //20m
+        const resetToken = jwt.sign(payload, process.env.RESET_PASSWORD_KEY, {expiresIn: '20s'});
         return resetToken;
     }
 

@@ -39,7 +39,7 @@ export class UserController{
     try{
       const {email} = req.body;
       await userService.forgotPassword(email);
-      res.json({message: 'Email has been sent'});
+      res.json({message: 'Reset link has been sent. Check you email'});
     } catch (e){
       next(e)
     }
@@ -50,6 +50,7 @@ export class UserController{
       const {resetLink, newPassword} = req.body;
       await userService.resetPassword(resetLink, newPassword);
       res.json({message: 'Your password has been changed'});
+      // res.redirect(`${process.env.CLIENT_URL}/login` || "http://localhost:3000/login");
     }catch (e) {
       next(e)
     }
