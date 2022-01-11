@@ -11,9 +11,10 @@ class TokenService{
             refreshToken
         };
     }
+
     validateAccessToken(token: string){
         try{
-            const userData = jwt.verify(token, process.env["JWT_ACCESS_SECRET "]);
+            const userData = jwt.verify(token, process.env.JWT_ACCESS_SECRET);
             return userData;
         }catch (e){
             return null;
@@ -22,7 +23,21 @@ class TokenService{
 
     validateRefreshToken(token: string){
         try{
-            const userData = jwt.verify(token, process.env["JWT_REFRESH_SECRET "]);
+            const userData = jwt.verify(token, process.env.JWT_REFRESH_SECRET);
+            return userData;
+        }catch (e){
+            return null;
+        }
+    }
+
+    generateResetToken(payload: string){
+        const resetToken = jwt.sign(payload, process.env.RESET_PASSWORD_KEY, {expiresIn: '20s'});
+        return resetToken;
+    }
+
+    validateResetToken(resetToken: string){
+        try{
+            const userData = jwt.verify(resetToken, process.env.RESET_PASSWORD_KEY);
             return userData;
         }catch (e){
             return null;
@@ -47,20 +62,6 @@ class TokenService{
     async findToken(refreshToken: string){
         const tokenData = await TokenModel.findOne({where: {refreshToken}});
         return tokenData;
-    }
-
-    generateResetToken(payload: string){
-        const resetToken = jwt.sign(payload, process.env.RESET_PASSWORD_KEY, {expiresIn: '20s'});
-        return resetToken;
-    }
-
-    validateResetToken(resetToken: string){
-        try{
-            const userData = jwt.verify(resetToken, process.env.RESET_PASSWORD_KEY);
-            return userData;
-        }catch (e){
-            return null;
-        }
     }
 
 }

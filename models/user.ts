@@ -1,5 +1,5 @@
 'use strict';
-import {Model, UUIDV4} from 'sequelize';
+import {Model} from 'sequelize';
 
 interface UserAttributes {
   id: number;
@@ -30,6 +30,9 @@ module.exports = (sequelize: any, DataTypes: any) => {
     static associate(models: any) {
       // define association here
       User.hasOne(models.Token, { onDelete: "cascade"});
+      User.hasMany(models.Note, {
+        foreignKey: 'UserId'
+      })
     }
   };
   User.init({
@@ -50,7 +53,7 @@ module.exports = (sequelize: any, DataTypes: any) => {
     },
     password: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: true
     },
     isActivated: {
       type: DataTypes.STRING,

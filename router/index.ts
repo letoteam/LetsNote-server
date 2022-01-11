@@ -1,10 +1,13 @@
 const Router = require('express').Router;
 // const userController = require('../controllers/user-controller')
 import UserController from "../controllers/user-controller";
+import NoteController from "../controllers/note-controller";
 
 const userController = new UserController();
+const noteController = new NoteController();
 const router = new Router();
 const {body} = require('express-validator');
+const authMiddleware = require('../middleware/auth-middleware');
 
 router.post('/sign-up', 
     body('email').isEmail().normalizeEmail(),
@@ -23,6 +26,6 @@ router.put('/recover/reset-password',
 
 router.get('/activate/:link', userController.activate);
 router.get('/refresh', userController.refresh);
-router.get('/users', userController.getUsers);
+router.get('/user-notes', authMiddleware, noteController.getUserNotes);
 
 export default router;

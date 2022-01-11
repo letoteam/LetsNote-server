@@ -2,7 +2,6 @@ import bcrypt from 'bcrypt';
 import { json } from 'stream/consumers';
 import MailService from './mail-service';
 import TokenService from './token-service';
-import {Response} from "express";
 
 const db = require('../models');
 const UserModel = db.User;
