@@ -26,6 +26,7 @@ router.put('/recover/reset-password',
 
 router.get('/activate/:link', userController.activate);
 router.get('/refresh', userController.refresh);
+
 router.get('/user-notes', authMiddleware, noteController.getUserNotes);
 
 export default router;
