@@ -31,7 +31,7 @@ class TokenService{
     }
 
     generateResetToken(payload: string){
-        const resetToken = jwt.sign(payload, process.env.RESET_PASSWORD_KEY, {expiresIn: '20s'});
+        const resetToken = jwt.sign(payload, process.env.RESET_PASSWORD_KEY, {expiresIn: '20m'});
         return resetToken;
     }
 
