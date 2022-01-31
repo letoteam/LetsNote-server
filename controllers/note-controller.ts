@@ -9,6 +9,7 @@ const ApiError = require('../exeptions/api-error');
 class NoteController{
     async getUserNotes(req: Request, res: Response, next: NextFunction){
         const {refreshToken} = req.cookies;
+        console.log(refreshToken);
         const notes = await noteService.getUserNotes(refreshToken);
         res.json(notes);
     }
