@@ -9,7 +9,6 @@ export class UserController{
   async registration(req: Request, res: Response, next: NextFunction) {
     try {
       const errors = validationResult(req);
-      // console.log(Array.isArray(errors));
       if(!errors.isEmpty()){
         return next(ApiError.BadRequest('Validation error', errors.array()));
       }

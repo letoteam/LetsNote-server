@@ -15,4 +15,8 @@ module.exports = class ApiError extends Error{
     static BadRequest(messege: string, errors=[]){
         return new ApiError(400, messege, errors);
     }
+
+    static NoPermission(messege: string, errors=[]){
+        return new ApiError(403,messege)
+    }
 }

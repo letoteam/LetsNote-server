@@ -1,7 +1,8 @@
 'use strict';
 import {Sequelize, Model} from "sequelize";
+const noteLabel =  require("./notelabel");
 
-interface NoteAttributes {
+export interface NoteAttributes {
   id: number;
   title: string;
   content: string | null;
@@ -23,13 +24,13 @@ module.exports = (sequelize: Sequelize, DataTypes: any) => {
      */
     static associate(models: any) {
       Note.belongsTo(models.User);
+      Note.belongsToMany(models.Label, {through: "NoteLabel"});
     }
   };
   Note.init({
     id: {
       type: DataTypes.INTEGER,
       autoIncrement: true,
-      allowNull: false,
       primaryKey: true
     },
     title: {
@@ -40,7 +41,7 @@ module.exports = (sequelize: Sequelize, DataTypes: any) => {
       type: DataTypes.STRING
     },
     isPrivate: {
-      type: DataTypes.STRING
+      type: DataTypes.BOOLEAN
     }
   }, {
     sequelize,

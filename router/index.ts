@@ -17,16 +17,25 @@ router.post('/sign-up',
 );
 router.post('/login', userController.login);
 router.post('/logout', userController.logout);
-
 router.put('/recover/forgot-password', userController.forgotPassword);
 router.put('/recover/reset-password',
     body('newPassword').isLength({min: 6, max: 32}),
     userController.resetPassword
 );
-
 router.get('/activate/:link', userController.activate);
 router.get('/refresh', userController.refresh);
 
-router.get('/user-notes', authMiddleware, noteController.getUserNotes);
-
+router.get('/all-notes', authMiddleware, noteController.getAllNotes);
+router.post('/create-note',
+    authMiddleware,
+    body('title').trim().isLength({min:1, max: 80}),
+    body('content').trim(),
+    noteController.createNote);
+router.get('/notes/:noteId', authMiddleware, noteController.getNote);
+router.put('/update-note',
+    authMiddleware,
+    body('title').trim().isLength({min:1, max: 80}),
+    body('content').trim(),
+    noteController.updateNote);
+router.delete('/delete-note/:noteId', authMiddleware, noteController.deleteNote)
 export default router;

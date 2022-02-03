@@ -4,7 +4,7 @@ const TokenModel = db.Token;
 
 class TokenService{
     generateTokens(payload: string){
-        const accessToken = jwt.sign(payload, process.env.JWT_ACCESS_SECRET,{expiresIn:'30m'});
+        const accessToken = jwt.sign(payload, process.env.JWT_ACCESS_SECRET,{expiresIn:'30d'}); //TODO: change to 15m
         const refreshToken = jwt.sign(payload, process.env.JWT_REFRESH_SECRET,{expiresIn:'30d'});
         return{
             accessToken,
@@ -16,6 +16,15 @@ class TokenService{
         try{
             const userData = jwt.verify(token, process.env.JWT_ACCESS_SECRET);
             return userData;
+        }catch (e){
+            return null;
+        }
+    }
+
+    getIdFromAccessToken(token: string){
+        try{
+            const userId = jwt.verify(token, process.env.JWT_ACCESS_SECRET).id;
+            return userId;
         }catch (e){
             return null;
         }
