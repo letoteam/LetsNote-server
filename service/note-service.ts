@@ -30,14 +30,18 @@ class NoteService{
         for (const label of allLabels) {
             await NoteLabelModel.create({
                 NoteId: noteId,
-                LabelId: label.dataValues.id
+                LabelId: label.get().id
             });
         }
         // finding and adding unique labels to table
         allLabels = allLabels.map((label: any) => label.get().title);
         let newLabels: string[] = labels.filter(label => !allLabels.includes(label));
         for (const label of newLabels) {
-            await LabelModel.create({title: label, userId});
+            const newLabel = await LabelModel.create({title: label, userId});
+            await NoteLabelModel.create({
+                NoteId: noteId,
+                LabelId: newLabel.get().id
+            })
         }
     }
 
@@ -58,22 +62,8 @@ class NoteService{
         //creating note & noteDto
         const note = await NoteModel.create({title, content, isPrivate, userId});
         const noteDto = new NoteDto(note.dataValues,labels);
-        //getting all user labels
-        let allLabels = await LabelModel.findAll( {where: {userId}});
-        //filling junction table NoteLabels
-        for (const label of allLabels) {
-            await NoteLabelModel.create({
-                NoteId: note.dataValues.id,
-                LabelId: label.dataValues.id
-            });
-        }
-        // finding and adding unique labels to table
-        allLabels = allLabels.map((label: any) => label.get().title);
-        let newLabels: string[] = labels.filter(label => !allLabels.includes(label));
-        for (const label of newLabels) {
-            await LabelModel.create({title: label, userId});
-        }
-        await this.createUniqueLabels(userId, note.dataValues.id, labels);
+
+        await this.createUniqueLabels(userId, note.get().id, labels);
 
         return noteDto;
     }
@@ -131,28 +121,30 @@ class NoteService{
     async deleteNote(accessToken: string, noteId: number){
         const userId = tokenService.getIdFromAccessToken(accessToken);
         if(!userId) throw ApiError.UnauthorizedError();
-        await NoteModel.destroy({where: {
-            id: noteId,
-                userId
+        const noteToDelete = await NoteModel.findOne({where: {
+            id: noteId
         }});
-        //get all ids of all labels
+
+        if(!noteToDelete) throw ApiError.BadRequest('Note with this ID does not exists');
+
+        if(noteToDelete.userId !== userId)  throw ApiError.NoPermission('You have no permission to delete this note');
+
         let labelsForDeleting = await NoteLabelModel.findAll({where: { NoteId: noteId}});
-        labelsForDeleting = labelsForDeleting.map((labelId: any) => labelId.get().LabelId);
-        //removing labels with noteId
-        await NoteLabelModel.destroy({where: {
-                NoteId: noteId
-        }});
+
         //getting IDs of used labels from NoteLabels table
         let usedLabels: number[] = [];
         for (const labelId of labelsForDeleting) {
-            let label = await NoteLabelModel.findOne({where: {LabelId: labelId}});
+            let label = await NoteLabelModel.findOne({where: {LabelId: labelId.get().LabelId}});
             label = label.get().id;
             usedLabels.push(label);
         }
 
+        await noteToDelete.destroy();
         if(usedLabels){
             labelsForDeleting = labelsForDeleting.filter((labelId:number) => !usedLabels.includes(labelId));
-            await NoteModel.destroy({where: {id: labelsForDeleting}})
+            for (const labelForDeleting of labelsForDeleting) {
+                await LabelModel.destroy({where: {id: labelForDeleting.dataValues.LabelId}})
+            }
         }
 
     }
