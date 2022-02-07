@@ -25,7 +25,7 @@ router.put('/recover/reset-password',
 router.get('/activate/:link', userController.activate);
 router.get('/refresh', userController.refresh);
 
-router.get('/all-notes', authMiddleware, noteController.getAllNotes);
+router.get('/notes', authMiddleware, noteController.getAllNotes);
 router.post('/create-note',
     authMiddleware,
     body('title').trim().isLength({min:1, max: 80}),

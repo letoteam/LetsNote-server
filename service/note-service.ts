@@ -10,18 +10,18 @@ const ApiError = require('../exeptions/api-error');
 const NoteDto = require('../dtos/note-dto');
 
 class NoteService{
-    // async getLabels(noteId: number){
-    //     let labels: string[] = [];
-    //     let labelIds = await NoteLabelModel.findAll({where: { NoteId: noteId}});
-    //     labelIds = labelIds.map((labelId: any) => labelId.get().LabelId);
-    //     for (const labelId of labelIds) {
-    //         let label = await LabelModel.findOne({where: {id: labelId}});
-    //         label = label.get().title;
-    //         labels.push(label);
-    //     }
-    //
-    //     return labels
-    // }
+    async getLabels(noteId: number){
+        let labels: string[] = [];
+        let labelIds = await NoteLabelModel.findAll({where: { NoteId: noteId}});
+        labelIds = labelIds.map((labelId: any) => labelId.get().LabelId);
+        for (const labelId of labelIds) {
+            let label = await LabelModel.findOne({where: {id: labelId}});
+            label = label.get().title;
+            labels.push(label);
+        }
+
+        return labels
+    }
 
     async createUniqueLabels(userId: number, noteId: number, labels: string[]){
         //getting all user labels
@@ -45,14 +45,18 @@ class NoteService{
         }
     }
 
-    async getAllNotes(refreshToken: string){
-        if(!refreshToken){
-            throw ApiError.UnauthorizedError();
+    async getAllNotes(accessToken: string){
+        const userId = tokenService.getIdFromAccessToken(accessToken);
+        if(!userId) throw ApiError.UnauthorizedError();
+        const notes = await NoteModel.findAll({where: { userId }}) // [{Note},{Note},...]
+        if(!notes) return [];
+        let notesDtos = [];
+        for (const note of notes) {
+            const labels = await this.getLabels(note.get().id);
+            const noteDto = new NoteDto(note.dataValues, labels)
+            notesDtos.push(noteDto);
         }
-        const userData = tokenService.validateRefreshToken(refreshToken);
-        const notes = await NoteModel.findAll({where: { userId: userData.id}}) // [{Note},{Note},...]
-
-        return notes;
+        return notesDtos;
     }
 
     async createNote(title: string, content: string, isPrivate: boolean, accessToken: string, labels: string[]) {
@@ -76,16 +80,9 @@ class NoteService{
         const note = await NoteModel.findOne({where: {
             id: noteId
         }});
+        if(!note) throw ApiError.BadRequest('This note does not exists')
         if(note.get().isPrivate && note.get().userId !== userId) throw ApiError.NoPermission('This is a private note');
-        // getting labels
-        let labels: string[] = [];
-        let labelIds = await NoteLabelModel.findAll({where: { NoteId: noteId}});
-        labelIds = labelIds.map((labelId: any) => labelId.get().LabelId);
-        for (const labelId of labelIds) {
-            let label = await LabelModel.findOne({where: {id: labelId}});
-            label = label.get().title;
-            labels.push(label);
-        }
+        let labels = await this.getLabels(note.id);
         const noteDto = new NoteDto(note.dataValues, labels);
 
         return noteDto

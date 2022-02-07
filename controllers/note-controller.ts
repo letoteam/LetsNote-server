@@ -11,8 +11,10 @@ const ApiError = require('../exeptions/api-error');
 class NoteController{
     async getAllNotes(req: Request, res: Response, next: NextFunction){
         try{
-            const {refreshToken} = req.cookies;
-            const notes = await noteService.getAllNotes(refreshToken);
+            const authorizationHeader = req.headers.authorization;
+            const accessToken = authorizationHeader?.split(' ')[1];
+            if(!accessToken) return next(ApiError.UnauthorizedError());
+            const notes = await noteService.getAllNotes(accessToken);
             res.json(notes);
         }catch (e) {
             next(e);
