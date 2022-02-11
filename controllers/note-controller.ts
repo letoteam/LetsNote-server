@@ -15,7 +15,21 @@ class NoteController{
             const accessToken = authorizationHeader?.split(' ')[1];
             if(!accessToken) return next(ApiError.UnauthorizedError());
             const notes = await noteService.getAllNotes(accessToken);
-            res.json(notes);
+            setTimeout(() =>
+                res.json(notes),
+                500);
+        }catch (e) {
+            next(e);
+        }
+    }
+
+    async getAllLabels(req: Request, res: Response, next: NextFunction){
+        try{
+            const authorizationHeader = req.headers.authorization;
+            const accessToken = authorizationHeader?.split(' ')[1];
+            if(!accessToken) return next(ApiError.UnauthorizedError());
+            const labels = await noteService.getAllLabels(accessToken);
+            res.json(labels);
         }catch (e) {
             next(e);
         }
@@ -76,6 +90,23 @@ class NoteController{
         }
     }
 
+    async toggleNotePrivacy(req: Request, res: Response, next: NextFunction){
+        try{
+            const authorizationHeader = req.headers.authorization;
+            const accessToken = authorizationHeader?.split(' ')[1];
+            if(!accessToken){
+                return next(ApiError.UnauthorizedError());
+            }
+            const { noteId } = req.body;
+
+            const noteData = await noteService.togglePrivacy(noteId, accessToken);
+
+            res.json(noteData);
+        }catch (e){
+            next(e);
+        }
+    }
+
     async deleteNote(req: Request, res: Response, next: NextFunction){
         try{
             const noteId = Number(req.params.noteId.split(':')[1]);
@@ -94,5 +125,7 @@ class NoteController{
         }
     }
 }
+
+// TODO: pagination for notes request
 
 export default NoteController;

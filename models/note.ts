@@ -38,7 +38,7 @@ module.exports = (sequelize: Sequelize, DataTypes: any) => {
       allowNull: false
     },
     content: {
-      type: DataTypes.STRING
+      type: DataTypes.STRING(2000)
     },
     isPrivate: {
       type: DataTypes.BOOLEAN

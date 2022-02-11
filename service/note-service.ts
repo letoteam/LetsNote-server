@@ -16,7 +16,10 @@ class NoteService{
         labelIds = labelIds.map((labelId: any) => labelId.get().LabelId);
         for (const labelId of labelIds) {
             let label = await LabelModel.findOne({where: {id: labelId}});
-            label = label.get().title;
+            label = {
+                id: label.get().id,
+                title: label.get().title
+            };
             labels.push(label);
         }
 
@@ -57,6 +60,20 @@ class NoteService{
             notesDtos.push(noteDto);
         }
         return notesDtos;
+    }
+
+    async getAllLabels(accessToken: string){
+        const userId = tokenService.getIdFromAccessToken(accessToken);
+        if(!userId) throw ApiError.UnauthorizedError();
+        let labels = await LabelModel.findAll({where: { userId }});
+        if(!labels) return [];
+        labels = labels.map((label:any) => {
+            return {
+                id: label.get().id,
+                title: label.get().title
+            };
+        });
+        return labels;
     }
 
     async createNote(title: string, content: string, isPrivate: boolean, accessToken: string, labels: string[]) {
@@ -108,10 +125,29 @@ class NoteService{
         for (const labelId of labelIds) {
             await LabelModel.destroy({where: {id: labelId}});
         }
-        //create new labels
         await this.createUniqueLabels(userId, noteId, labels);
         const noteDto = new NoteDto(note.dataValues,labels);
 
+        return noteDto
+    }
+
+    async togglePrivacy(noteId: number, accessToken: string){
+        if(!noteId) throw ApiError.BadRequest();
+        const userId = tokenService.getIdFromAccessToken(accessToken);
+        if(!userId) throw ApiError.UnauthorizedError();
+        // getting note
+        const note = await NoteModel.findOne({where: {
+                id: noteId
+            }});
+        if(!note) throw ApiError.BadRequest('Note does not exist');
+        if(note.get().userId !== userId) throw ApiError.BadRequest('Permission error');
+        //updating privacy
+        note.isPrivate = !note.isPrivate;
+        await note.save();
+
+        const labels = await this.getLabels(noteId);
+
+        const noteDto = new NoteDto(note.dataValues,labels);
         return noteDto
     }
 

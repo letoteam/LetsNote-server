@@ -80,12 +80,14 @@ export class UserController{
       const {refreshToken} = req.cookies;
       const userData = await userService.refresh(refreshToken)
       res.cookie('refreshToken', userData.refreshToken, {maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true})
-      return res.json(userData);
+      return setTimeout(() => res.json(userData), 500);
     } catch (e) {
       next(e);
     }
   }
 
 }
+
+// TODO: delete response delay in prod
 
 export default UserController;

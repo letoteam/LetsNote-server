@@ -26,6 +26,7 @@ router.get('/activate/:link', userController.activate);
 router.get('/refresh', userController.refresh);
 
 router.get('/notes', authMiddleware, noteController.getAllNotes);
+router.get('/labels', authMiddleware, noteController.getAllLabels);
 router.post('/create-note',
     authMiddleware,
     body('title').trim().isLength({min:1, max: 80}),
@@ -37,5 +38,6 @@ router.put('/update-note',
     body('title').trim().isLength({min:1, max: 80}),
     body('content').trim(),
     noteController.updateNote);
+router.put('/toggle-privacy', authMiddleware, noteController.toggleNotePrivacy);
 router.delete('/delete-note/:noteId', authMiddleware, noteController.deleteNote)
 export default router;
