@@ -14,21 +14,22 @@ const errorMiddleware = require('./middleware/error-middleware');
 app.use(express.json());
 app.use(cookieParser());
 app.use(
-    cors({
-        credentials: true,
-        origin: [String(process.env.API_URL), String(process.env.CLIENT_URL)]
-    })
+  cors({
+    credentials: true,
+    origin: [String(process.env.API_URL), String(process.env.CLIENT_URL)],
+  })
 );
 app.use('/api', router);
 app.use(errorMiddleware);
 
-const start = async() => {
-    try {
-        app.listen(5000,()=>console.log('Server started on port: ' + PORT))
-    } catch (e) {
-        console.log(e);
-    }
-}
+const start = async () => {
+  try {
+    app.listen(5000, () => console.log('Server started on port: ' + PORT));
+  } catch (e) {
+    console.log(e);
+  }
+};
 
+// db.sequelize.drop();
 // db.sequelize.sync({force: true}).then(start());
 start();

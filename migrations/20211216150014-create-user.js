@@ -6,22 +6,44 @@ module.exports = {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
+      },
+      name: {
+        type: Sequelize.STRING,
+        allowNull: false,
       },
       email: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+      },
+      password: {
+        type: Sequelize.STRING,
+        allowNull: true,
+      },
+      isActivated: {
+        type: Sequelize.STRING,
+        defaultValue: false,
+        allowNull: false,
+      },
+      resetLink: {
+        type: Sequelize.STRING,
+        defaultValue: '',
+        allowNull: true,
+      },
+      activationLink: {
+        type: Sequelize.STRING,
+        allowNull: true,
       },
       createdAt: {
         allowNull: false,
-        type: Sequelize.DATE
+        type: Sequelize.DATE,
       },
       updatedAt: {
         allowNull: false,
-        type: Sequelize.DATE
-      }
+        type: Sequelize.DATE,
+      },
     });
   },
   down: async (queryInterface, Sequelize) => {
     await queryInterface.dropTable('Users');
-  }
+  },
 };

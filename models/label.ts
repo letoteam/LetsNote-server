@@ -1,16 +1,15 @@
 'use strict';
-import {Sequelize, Model} from "sequelize";
+import { Sequelize, Model } from 'sequelize';
 
-interface LabelAttributes{
-  id: number,
-  title: string,
+interface LabelAttributes {
+  id: number;
+  title: string;
 }
 
 module.exports = (sequelize: Sequelize, DataTypes: any) => {
-  class Label extends Model<LabelAttributes>
-  implements LabelAttributes{
+  class Label extends Model<LabelAttributes> implements LabelAttributes {
     id!: number;
-    title!: string
+    title!: string;
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
@@ -19,22 +18,25 @@ module.exports = (sequelize: Sequelize, DataTypes: any) => {
     static associate(models: any) {
       // define association here
       Label.belongsTo(models.User);
-      Label.belongsToMany(models.Note, {through: 'NoteLabel'});
+      Label.belongsToMany(models.Note, { through: 'NoteLabel' });
     }
-  };
-  Label.init({
-    id: {
-      type: DataTypes.INTEGER,
-      primaryKey: true,
-      autoIncrement: true
+  }
+  Label.init(
+    {
+      id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        autoIncrement: true,
+      },
+      title: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
     },
-    title: {
-      type: DataTypes.STRING,
-      allowNull: false
+    {
+      sequelize,
+      modelName: 'Label',
     }
-  }, {
-    sequelize,
-    modelName: 'Label',
-  });
+  );
   return Label;
 };

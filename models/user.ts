@@ -1,5 +1,5 @@
 'use strict';
-import {Model} from 'sequelize';
+import { Model } from 'sequelize';
 
 interface UserAttributes {
   id: number;
@@ -12,8 +12,7 @@ interface UserAttributes {
 }
 
 module.exports = (sequelize: any, DataTypes: any) => {
-  class User extends Model<UserAttributes> 
-  implements UserAttributes{
+  class User extends Model<UserAttributes> implements UserAttributes {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
@@ -29,53 +28,55 @@ module.exports = (sequelize: any, DataTypes: any) => {
 
     static associate(models: any) {
       // define association here
-      User.hasOne(models.Token, { onDelete: "cascade"});
+      User.hasOne(models.Token, { onDelete: 'cascade' });
       User.hasMany(models.Note, {
-        foreignKey: 'userId'
+        foreignKey: 'userId',
       });
       User.hasMany(models.Label, {
-        foreignKey: 'userId'
-      })
+        foreignKey: 'userId',
+      });
     }
-  };
-  User.init({
-    id: {
-      type: DataTypes.INTEGER,
-      autoIncrement: true,
-      allowNull: false,
-      primaryKey: true
-    },
-    name: {
-      type: DataTypes.STRING,
-      allowNull: false
-    },
-    email: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      unique: true
-    },
-    password: {
-      type: DataTypes.STRING,
-      allowNull: true
-    },
-    isActivated: {
-      type: DataTypes.STRING,
-      defaultValue: false,
-      allowNull: false
-    },
-    resetLink: {
-      type: DataTypes.STRING,
-      defaultValue: '',
-      allowNull: true,
-    },
-    activationLink: {
-      type: DataTypes.STRING,
-      allowNull: true
-    }
-  },  
+  }
+  User.init(
     {
-    sequelize,
-    modelName: 'User',
-  });
+      id: {
+        type: DataTypes.INTEGER,
+        autoIncrement: true,
+        allowNull: false,
+        primaryKey: true,
+      },
+      name: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+      email: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: true,
+      },
+      password: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+      isActivated: {
+        type: DataTypes.STRING,
+        defaultValue: false,
+        allowNull: false,
+      },
+      resetLink: {
+        type: DataTypes.STRING,
+        defaultValue: '',
+        allowNull: true,
+      },
+      activationLink: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+    },
+    {
+      sequelize,
+      modelName: 'User',
+    }
+  );
   return User;
 };

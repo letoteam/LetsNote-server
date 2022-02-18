@@ -1,17 +1,16 @@
 'use strict';
-import {Sequelize, Model} from "sequelize";
-const noteLabel =  require("./notelabel");
+import { Sequelize, Model } from 'sequelize';
+const noteLabel = require('./notelabel');
 
 export interface NoteAttributes {
   id: number;
   title: string;
   content: string | null;
-  isPrivate: boolean
+  isPrivate: boolean;
 }
 
 module.exports = (sequelize: Sequelize, DataTypes: any) => {
-  class Note extends Model<NoteAttributes>
-  implements NoteAttributes{
+  class Note extends Model<NoteAttributes> implements NoteAttributes {
     id!: number;
     title!: string;
     content!: string | null;
@@ -24,28 +23,31 @@ module.exports = (sequelize: Sequelize, DataTypes: any) => {
      */
     static associate(models: any) {
       Note.belongsTo(models.User);
-      Note.belongsToMany(models.Label, {through: "NoteLabel"});
+      Note.belongsToMany(models.Label, { through: 'NoteLabel' });
     }
-  };
-  Note.init({
-    id: {
-      type: DataTypes.INTEGER,
-      autoIncrement: true,
-      primaryKey: true
+  }
+  Note.init(
+    {
+      id: {
+        type: DataTypes.INTEGER,
+        autoIncrement: true,
+        primaryKey: true,
+      },
+      title: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+      content: {
+        type: DataTypes.STRING(2000),
+      },
+      isPrivate: {
+        type: DataTypes.BOOLEAN,
+      },
     },
-    title: {
-      type: DataTypes.STRING,
-      allowNull: false
-    },
-    content: {
-      type: DataTypes.STRING(2000)
-    },
-    isPrivate: {
-      type: DataTypes.BOOLEAN
+    {
+      sequelize,
+      modelName: 'Note',
     }
-  }, {
-    sequelize,
-    modelName: 'Note',
-  });
+  );
   return Note;
 };
