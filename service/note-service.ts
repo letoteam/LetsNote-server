@@ -52,9 +52,13 @@ class NoteService {
 
   async getAllNotes(accessToken: string) {
     const userId = tokenService.getIdFromAccessToken(accessToken);
-    if (!userId) throw ApiError.UnauthorizedError();
-    const notes = await NoteModel.findAll({ where: { UserId: userId } }); // [{Note},{Note},...]
-    if (!notes) return [];
+    if (!userId) {
+      throw ApiError.UnauthorizedError();
+    }
+    const notes = await NoteModel.findAll({ where: { userId } }); // [{Note},{Note},...]
+    if (!notes) {
+      return [];
+    }
     let notesDtos = [];
     for (const note of notes) {
       const labels = await this.getLabels(note.get().id);
@@ -151,6 +155,7 @@ class NoteService {
     for (const labelId of labelIds) {
       await LabelModel.destroy({ where: { id: labelId } });
     }
+    // Create new labels
     await this.createUniqueLabels(userId, noteId, labels);
     const noteDto = new NoteDto(note.dataValues, labels);
 

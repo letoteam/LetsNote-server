@@ -13,9 +13,11 @@ class NoteController {
     try {
       const authorizationHeader = req.headers.authorization;
       const accessToken = authorizationHeader?.split(' ')[1];
-      if (!accessToken) return next(ApiError.UnauthorizedError());
+      if (!accessToken) {
+        return next(ApiError.UnauthorizedError());
+      }
       const notes = await noteService.getAllNotes(accessToken);
-      setTimeout(() => res.json(notes), 500);
+      res.json(notes);
     } catch (e) {
       next(e);
     }
