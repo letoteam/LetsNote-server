@@ -8,7 +8,7 @@ const noteController = new NoteController();
 const router = new Router();
 const { body } = require('express-validator');
 const authMiddleware = require('../middleware/auth-middleware');
-
+//auth routes
 router.post(
   '/sign-up',
   body('email').isEmail().normalizeEmail(),
@@ -26,7 +26,7 @@ router.put(
 );
 router.get('/activate/:link', userController.activate);
 router.get('/refresh', userController.refresh);
-
+//notes routes
 router.get('/notes', authMiddleware, noteController.getAllNotes);
 router.get('/labels', authMiddleware, noteController.getAllLabels);
 router.post(
@@ -36,7 +36,7 @@ router.post(
   body('content').trim(),
   noteController.createNote
 );
-router.get('/notes/:noteId', authMiddleware, noteController.getNote);
+// router.get('/notes/:noteId', authMiddleware, noteController.getNote);
 router.put(
   '/update-note',
   authMiddleware,
@@ -50,4 +50,11 @@ router.delete(
   authMiddleware,
   noteController.deleteNote
 );
+
+router.get('/users', authMiddleware, userController.getAllUsers);
+router.get('/public-notes', authMiddleware, noteController.getPublicNotes);
+router.get('/public-notes/:noteId', authMiddleware, noteController.getPublicNote);
+router.get('/user-notes/:userId', authMiddleware, noteController.getUserNotes);
+
+
 export default router;

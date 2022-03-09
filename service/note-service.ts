@@ -1,5 +1,5 @@
 import TokenService from './token-service';
-import { where } from 'sequelize';
+import { Op, where } from 'sequelize';
 
 const db = require('../models');
 const NoteModel = db.Note;
@@ -16,11 +16,13 @@ class NoteService {
     labelIds = labelIds.map((labelId: any) => labelId.get().LabelId);
     for (const labelId of labelIds) {
       let label = await LabelModel.findOne({ where: { id: labelId } });
-      label = {
-        id: label.get().id,
-        title: label.get().title,
-      };
-      labels.push(label);
+      if(label){
+        label = {
+          id: label.get().id,
+          title: label.get().title,
+        };
+        labels.push(label);
+      }
     }
 
     return labels;
@@ -29,7 +31,7 @@ class NoteService {
   async createUniqueLabels(userId: number, noteId: number, labels: string[]) {
     //getting all user labels
     let allLabels = await LabelModel.findAll({ where: { UserId: userId } });
-    //filling junction table NoteLabels
+    //filling NoteLabels table
     for (const label of allLabels) {
       await NoteLabelModel.create({
         NoteId: noteId,
@@ -99,26 +101,30 @@ class NoteService {
       isPrivate,
       UserId: userId,
     });
-    const noteDto = new NoteDto(note.dataValues, labels);
-
     await this.createUniqueLabels(userId, note.get().id, labels);
+    const labelsArr = await this.getLabels(note.get().id);
+    console.log(await this.getLabels(note.get().id));
+    const noteDto = new NoteDto(note.dataValues, labelsArr);
 
     return noteDto;
   }
 
   async getNoteById(noteId: number, accessToken: string) {
     // getting user ID
-    const userId = tokenService.getIdFromAccessToken(accessToken);
-    if (!userId) throw ApiError.UnauthorizedError();
+    // const userId = tokenService.getIdFromAccessToken(accessToken);
+    // if (!userId) throw ApiError.UnauthorizedError();
     // getting note
     const note = await NoteModel.findOne({
       where: {
         id: noteId,
       },
     });
-    if (!note) throw ApiError.BadRequest('This note does not exists');
-    if (note.get().isPrivate && note.get().userId !== userId)
+    if (!note) {
+      throw ApiError.BadRequest('Note does not exists');
+    }
+    if (note.get().isPrivate){
       throw ApiError.NoPermission('This is a private note');
+    }
     let labels = await this.getLabels(note.id);
     const noteDto = new NoteDto(note.dataValues, labels);
 
@@ -157,8 +163,8 @@ class NoteService {
     }
     // Create new labels
     await this.createUniqueLabels(userId, noteId, labels);
-    const noteDto = new NoteDto(note.dataValues, labels);
-
+    const labelsArr = await this.getLabels(noteId);
+    const noteDto = new NoteDto(note.dataValues, labelsArr);
     return noteDto;
   }
 
@@ -227,6 +233,46 @@ class NoteService {
     }
 
     return noteId;
+  }
+
+  async getPublicNotes(accessToken: string){
+    const userId = tokenService.getIdFromAccessToken(accessToken);
+    if (!userId) {
+      throw ApiError.UnauthorizedError();
+    }
+    const notes = await NoteModel.findAll({where: {
+      [Op.not]: [{UserId: userId}],
+      isPrivate: false
+    }});
+    if (!notes) {
+      return [];
+    }
+
+    let notesDtos = [];
+    for (const note of notes) {
+      const labels = await this.getLabels(note.get().id);
+      const noteDto = new NoteDto(note.dataValues, labels);
+      notesDtos.push(noteDto);
+    }
+    return notesDtos;
+
+  }
+
+  async getUserNotes(accessToken: string, userId: number){
+    // const currentUserId = tokenService.getIdFromAccessToken(accessToken);
+    // if(userId === currentUserId){}
+    const notes = await NoteModel.findAll({where: {
+        UserId: userId,
+        isPrivate: false
+      }});
+
+    let notesDtos = [];
+    for (const note of notes) {
+      const labels = await this.getLabels(note.get().id);
+      const noteDto = new NoteDto(note.dataValues, labels);
+      notesDtos.push(noteDto);
+    }
+    return notesDtos;
   }
 }
 

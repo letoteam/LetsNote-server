@@ -60,22 +60,6 @@ class NoteController {
     }
   }
 
-  async getNote(req: Request, res: Response, next: NextFunction) {
-    try {
-      const noteId = Number(req.params.noteId.split(':')[1]);
-      if (!noteId) throw ApiError.BadRequest('note ID is undefined');
-      const authorizationHeader = req.headers.authorization;
-      const accessToken = authorizationHeader?.split(' ')[1];
-      if (!accessToken) {
-        return next(ApiError.UnauthorizedError());
-      }
-      const noteData = await noteService.getNoteById(noteId, accessToken);
-      res.json(noteData);
-    } catch (e) {
-      next(e);
-    }
-  }
-
   async updateNote(req: Request, res: Response, next: NextFunction) {
     try {
       const errors = validationResult(req);
@@ -133,10 +117,63 @@ class NoteController {
       await noteService.deleteNote(accessToken, noteId);
 
       res.json({
-        message: 'Note has been deleted'
+        message: 'Note has been deleted',
+        noteId
       });
     } catch (e) {
       next(e);
+    }
+  }
+
+  async getPublicNotes(req: Request, res: Response, next: NextFunction) {
+    try{
+      const authorizationHeader = req.headers.authorization;
+      const accessToken = authorizationHeader?.split(' ')[1];
+      if (!accessToken) {
+        return next(ApiError.UnauthorizedError());
+      }
+      const notes = await noteService.getPublicNotes(accessToken);
+      res.json(notes);
+    }catch (e){
+      next(e)
+    }
+  }
+
+  async getPublicNote(req: Request, res: Response, next: NextFunction) {
+    try {
+      const authorizationHeader = req.headers.authorization;
+      const accessToken = authorizationHeader?.split(' ')[1];
+      if (!accessToken) {
+        return next(ApiError.UnauthorizedError());
+      }
+
+      const noteId = Number(req.params.noteId);
+      if (!noteId){
+        throw ApiError.BadRequest('Invalid noteId');
+      }
+      const noteData = await noteService.getNoteById(noteId, accessToken);
+      res.json(noteData);
+    } catch (e) {
+      next(e);
+    }
+  }
+
+  async getUserNotes(req: Request, res: Response, next: NextFunction){
+    try{
+      const authorizationHeader = req.headers.authorization;
+      const accessToken = authorizationHeader?.split(' ')[1];
+      if (!accessToken) {
+        return next(ApiError.UnauthorizedError());
+      }
+
+      const userId = Number(req.params.userId);
+      if(!userId){
+        return next(ApiError.BadRequest('Invalid User id'));
+      }
+      const notes = await noteService.getUserNotes(accessToken, userId);
+      res.json(notes);
+    }catch(e){
+      next(e)
     }
   }
 }

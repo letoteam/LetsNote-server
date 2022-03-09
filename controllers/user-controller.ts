@@ -91,8 +91,24 @@ export class UserController {
         maxAge: 30 * 24 * 60 * 60 * 1000,
         httpOnly: true,
       });
-      return setTimeout(() => res.json(userData), 500);
+      res.json(userData)
     } catch (e) {
+      next(e);
+    }
+  }
+
+  async getAllUsers(req: Request, res: Response, next: NextFunction){
+    try{
+      const authorizationHeader = req.headers.authorization;
+      const accessToken = authorizationHeader?.split(' ')[1];
+      if (!accessToken) {
+        return next(ApiError.UnauthorizedError());
+      }
+
+      const users = await userService.getUsers(accessToken);
+
+      res.json(users);
+    }catch (e){
       next(e);
     }
   }

@@ -2,9 +2,12 @@ import bcrypt from 'bcrypt';
 import { json } from 'stream/consumers';
 import MailService from './mail-service';
 import TokenService from './token-service';
+import UserController from '../controllers/user-controller';
+import { Op } from 'sequelize';
 
 const db = require('../models');
 const UserModel = db.User;
+const NoteModel = db.Note;
 const mailService = new MailService();
 const tokenService = new TokenService();
 const UserDto = require('../dtos/user-dto');
@@ -112,6 +115,31 @@ class UserService {
 
     await tokenService.saveToken(userDto.id, tokens.refreshToken);
     return { ...tokens, user: userDto };
+  }
+
+  async getUsers(accessToken: string) {
+    const userId = tokenService.getIdFromAccessToken(accessToken);
+    if (!userId) {
+      throw ApiError.UnauthorizedError();
+    }
+
+    const users = await UserModel.findAll({where: {
+      [Op.not]: [{id: userId}]
+      }});
+    const notesNumber = await NoteModel.count({where: {
+      UserId: userId
+    }})
+    // const notesNumber = await NoteModel.count({where: {
+    //     userId
+    //   }})
+
+    let userDtos = [];
+    for (const user of users) {
+      const userDto = new UserDto(user.dataValues);
+      userDtos.push(userDto);
+    }
+
+    return { user: userDtos, notesNumber };
   }
 }
 
