@@ -20,7 +20,7 @@ module.exports = {
         allowNull: true,
       },
       isActivated: {
-        type: Sequelize.STRING,
+        type: Sequelize.BOOLEAN,
         defaultValue: false,
         allowNull: false,
       },

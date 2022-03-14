@@ -126,20 +126,20 @@ class UserService {
     const users = await UserModel.findAll({where: {
       [Op.not]: [{id: userId}]
       }});
-    const notesNumber = await NoteModel.count({where: {
-      UserId: userId
-    }})
     // const notesNumber = await NoteModel.count({where: {
-    //     userId
-    //   }})
+    //   UserId: userId
+    // }})
 
     let userDtos = [];
     for (const user of users) {
       const userDto = new UserDto(user.dataValues);
-      userDtos.push(userDto);
+      const notesNumber = await NoteModel.count({where: {
+          UserId: user.id
+        }});
+      userDtos.push({ ...userDto, notesNumber });
     }
 
-    return { user: userDtos, notesNumber };
+    return { users: userDtos };
   }
 }
 

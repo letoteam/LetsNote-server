@@ -65,7 +65,7 @@ module.exports = (sequelize: any, DataTypes: any) => {
         allowNull: true,
       },
       isActivated: {
-        type: DataTypes.STRING,
+        type: DataTypes.BOOLEAN,
         defaultValue: false,
         allowNull: false,
       },
